@@ -23,8 +23,28 @@ msg_prompt = {
     'summarization' : {
         'system' : "You are a helpful assistant to summarize the review.",
         'user' : "Write 1 sentence of a simple greeting that starts with '물론이죠! 이 상품의 리뷰를 요약해드리겠습니다.'"
-    }
+    },
+    'intent' : {
+        'system' : "You are a helpful assistant who understands the intent of the user's question.",
+        'user' : "Which category does the sentence below belong to: 'recommand', 'comparison', 'summarization'? Show only categories."
+    } 
 }
+
+def set_prompt(intent, input, msg_prompt):
+    m = dict()
+    if('recommand' in intent):
+        msg = msg_prompt['recommand']
+    elif('comparison' in intent):
+        msg = msg_prompt['comparison']
+    elif('summarization' in intent):
+        msg = msg_prompt['summarization']
+    else:
+        msg = msg_prompt['intent']
+        msg['user'] += f' {input} \n A:'
+    for k, v in msg.items():
+        m['role'], m['content'] = k, v
+    return [m]
+
 
 def chatGPT(messages):
     # set api key 
@@ -36,7 +56,7 @@ def chatGPT(messages):
         temperature=0.7,
         max_tokens=2048
     )
-    return completion
+    return completion['choices'][0]['message']['content']
 
 
 '''if __name__ == '__main__':
@@ -66,9 +86,16 @@ def process_input():
     input = data['input']
 
     result = {'message' : 'input 작업이 완료되었습니다.'}
-    chatGPT(messages)
-
+    user_intent = set_prompt('intent', input, msg_prompt)
+    user_intent = chatGPT(user_intent)
+    
     print(input)
+    print(user_intent)
+
+    '''intent_data = set_prompt(user_intent, input, msg_prompt)
+    intent_data_msg = chatGPT(intent_data).replace("\n", "").strip()
+    
+    print(intent_data_msg)'''
 
     return jsonify(result)
 
