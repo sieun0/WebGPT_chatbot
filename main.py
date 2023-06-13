@@ -3,6 +3,7 @@ from flask import request, jsonify
 from flask_cors import CORS
 import os
 import openai
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -11,7 +12,7 @@ CORS(app)
 
 
 '''def chatGPT():
-    # set api key
+    # set api key 
     openai.api_key = API_KEY 
 
     # Call the chat GPT API
@@ -35,9 +36,18 @@ def chat():
 def process_output():
     data = request.get_json()
     output = data['output']
-    
+
     result = {'message' : '작업이 완료되었습니다.'}
+
+    crawling(output)
+
     return jsonify(result)
+
+@app.route('/')
+def crawling(output):
+    cmd = f'node ./webCrawling/crawling.js {output}'
+    subprocess.run(cmd, shell=True)
+    #return send_from_directory('webCrawling', 'app.js')
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)

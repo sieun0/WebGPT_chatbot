@@ -3,7 +3,7 @@ const { Configuration, OpenAIApi } = require('https://cdn.skypack.dev/openai');
 function keywordGPTCall(input) {
     return new Promise((resolve, reject) => {
         const configuration = new Configuration({
-            apiKey: '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'
+            apiKey: ''
         });
         const openai = new OpenAIApi(configuration);
         const messages = [ //검색어 입력 키워드 추출해내는 메시지
