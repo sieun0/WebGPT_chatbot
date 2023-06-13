@@ -50,43 +50,73 @@
           }
           
     }
+  
+    async function sendOutputToServer(output) {
+      try {
+        const response = await fetch('/process_output', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body:JSON.stringify({output : output})
+        });
+
+        if(response.ok) {
+        const result = await response.json();
+        console.log(result);
+        } else {
+          console.error('서버 응답 오류', response.status);
+        }
+      } catch(error) {
+        console.error('AJAX 요청 실패:', error);
+      }
+    }
+
     document.querySelector('#send').addEventListener('click', async function(){
         var inputText = document.querySelector('#input').value;
         var inputbox = `<div class="line">
             <span class="chat-box mine">${ inputText }</span>
         </div>`
         document.querySelector('.chat-content').insertAdjacentHTML('beforeend', inputbox);
-        const keywordmessages = [ //검색어 입력 키워드 추출해내는 메시지
-                    {'role':'system', 'content':'You are an AI that only extracts keyword words from sentences to search on the website. You are extract only words that are not in sentence form. For example, in the sentence "1Kg 이하의 삼성 이온 노트북의 가격을 비교해줘", the keyword word is "삼성 이온 노트북".'},
-                    {'role':'user', 'content':'2만원 이하의 장수 사과를 찾아줘.'},
-                    {'role':'assistant', 'content':'장수 사과'},
-                    {'role':'user', 'content':'보라카이의 리조트를 가고 싶어'},
-                    {'role':'assistant', 'content':'보라카이 리조트'},
-                    {'role':'user', 'content':'여성여름바지사고싶어. 가격추천해줘.'},
-                    {'role':'assistant', 'content':'여성여름바지'},
-                    {'role':'user', 'content':'다이슨 청소기를 사고싶어. 가격을 알려줄래?'},
-                    {'role':'assistant', 'content':'다이슨 청소기'},
-                    {'role':'user', 'content':'여성여름 바지 가격 비교'},
-                    {'role':'assistant', 'content':'여성여름 바지'},
-                    {'role':'user', 'content':'제일 당류가 적은 커피는 ???'},
-                    {'role':'assistant', 'content':'커피'},
-                    {'role':'user', 'content':'나이키 브랜드의 슬리퍼를 구매하고 싶어. 제일 저렴한 게 뭐야?'},
-                    {'role':'assistant', 'content':'나이키 슬리퍼'},
-                    {'role':'user', 'content':'유통기한이 2023년 이내인 몰티져스 초콜릿을 찾아줘.'},
-                    {'role':'assistant', 'content':'몰티져스 초콜릿'},
-                    {'role':'user', 'content':'캐리비안 베이 티켓은 얼마야? 그것도 여기 파나?'},
-                    {'role':'assistant', 'content':'캐리비안 베이 티켓'},
-                    {'role': 'user', 'content': inputText}
-                    //{'role':'assistant', 'content': {'prompt':'5L 이상인 에어 프라이어를 보여줘.', 'completion':'에어 프라이어'}}
-                    ]
-
-            const output = await callGPTapi(keywordmessages);
-            console.log(output);
-            var outputbox = `<div class="line">
-                <span class="chat-box">${ output }</span>
-            </div>`
-            document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
         
+        const keywordmessages = [ //검색어 입력 키워드 추출해내는 메시지
+                        {'role':'system', 'content':'You are an AI that only extracts keyword words from sentences to search on the website. You are extract only words that are not in sentence form. You cannot print it out as a sentence. For example, in the sentence "1Kg 이하의 삼성 이온 노트북의 리뷰를 요약해줘", the keyword word is "삼성 이온 노트북".'},
+                        {'role':'user', 'content':'2만원 이하의 장수 사과를 찾아줘.'},
+                        {'role':'assistant', 'content':'장수 사과'},
+                        {'role':'user', 'content':'보라카이의 리조트를 가고 싶어'},
+                        {'role':'assistant', 'content':'보라카이 리조트'},
+                        {'role':'user', 'content':'여성여름바지사고싶어. 가격추천해줘.'},
+                        {'role':'assistant', 'content':'여성여름바지'},
+                        {'role':'user', 'content':'다이슨 청소기를 사고싶어. 가격을 알려줄래?'},
+                        {'role':'assistant', 'content':'다이슨 청소기'},
+                        {'role':'user', 'content':'여성여름 바지 가격 비교'},
+                        {'role':'assistant', 'content':'여성여름 바지'},
+                        {'role':'user', 'content':'제일 당류가 적은 커피는 ???'},
+                        {'role':'assistant', 'content':'커피'},
+                        {'role':'user', 'content':'나이키 브랜드의 슬리퍼를 구매하고 싶어. 제일 저렴한 게 뭐야?'},
+                        {'role':'assistant', 'content':'나이키 슬리퍼'},
+                        {'role':'user', 'content':'유통기한이 2023년 이내인 몰티져스 초콜릿을 찾아줘.'},
+                        {'role':'assistant', 'content':'몰티져스 초콜릿'},
+                        {'role':'user', 'content':'캐리비안 베이 티켓은 얼마야? 그것도 여기 파나?'},
+                        {'role':'assistant', 'content':'캐리비안 베이 티켓'},
+                        {'role':'user', 'content':'LG 그램의 리뷰 요약해줘.'},
+                        {'role':'assistant', 'content':'lg 그램'},
+                        {'role':'user', 'content':'애플 맥북의 리뷰를 요약해줘.'},
+                        {'role':'assistant', 'content':'애플 맥북'},
+                        {'role':'user', 'content':'삼성 노트북 가격 출력해줘'},
+                        {'role':'assistant', 'content':'삼성 노트북'},
+                        {'role': 'user', 'content': inputText}
+                        //{'role':'assistant', 'content': {'prompt':'5L 이상인 에어 프라이어를 보여줘.', 'completion':'에어 프라이어'}}
+                        ]
+ 
+        const output = await callGPTapi(keywordmessages);
+        console.log(output);
+        var outputbox = `<div class="line">
+            <span class="chat-box">${ output }</span>
+        </div>`
+        document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+        
+        sendOutputToServer(output);
     })
   </script>
 </body>

@@ -31,5 +31,13 @@ if __name__ == '__main__':
 def chat():
     return send_from_directory('gpt_call', 'chat.html')
 
+@app.route('/process_output', methods=['POST'])
+def process_output():
+    data = request.get_json()
+    output = data['output']
+
+    result = {'message' : '작업이 완료되었습니다.'}
+    return jsonify(result)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)
