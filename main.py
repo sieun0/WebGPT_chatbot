@@ -35,7 +35,7 @@ def chat():
 def process_output():
     data = request.get_json()
     output = data['output']
-
+    
     result = {'message' : '작업이 완료되었습니다.'}
     return jsonify(result)
 
