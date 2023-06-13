@@ -29,11 +29,7 @@ if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)'''
 @app.route("/")
 def chat():
-    return send_from_directory('', 'chat.html')
-
-'''@app.route("/apikey.js")
-def get_apikey():
-    return send_from_directory('WebGPTproject_capstone', 'apikey.js')'''
+    return send_from_directory('gpt_call', 'chat.html')
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)
