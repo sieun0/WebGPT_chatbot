@@ -1,6 +1,8 @@
 from flask import Flask, send_from_directory
 from flask import request, jsonify
+from flask import render_template
 from flask_cors import CORS
+
 import os
 import openai
 import subprocess
@@ -12,32 +14,32 @@ CORS(app)
 API_KEY= os.getenv("FLASK_API_KEY")
 
 msg_prompt = {
-    'recommand' : {
-        'system' : "You are a helpful assistant who hepls me recommend the products searched in the chatbot conversation system.",
+    'Recommendation' : {
+        'system' : "You are a helpful assistant to recommend the products searched in the chatbot conversation system.",
         'user' : "Write 1 sentence of a simple greeting that starts with '물론이죠! 제가 상품을 추천해드릴게요.'"
     },
-    'comparison' : {
+    'Comparison' : {
         'system' : "You are an assistant who can compare prices in the chatbot conversation system.",
-        'user' : "Please write a simple greeting starting with '물론이죠. 말씀하신 상품의 가격을 비교할게요."
+        'user' : "Write 1 sentence of a simple greeting that starts with '물론이죠! 말씀하신 상품의 가격을 비교해드릴게요.'"
     },
-    'summarization' : {
+    'Summarization' : {
         'system' : "You are a helpful assistant to summarize the review.",
         'user' : "Write 1 sentence of a simple greeting that starts with '물론이죠! 이 상품의 리뷰를 요약해드리겠습니다.'"
     },
     'intent' : {
         'system' : "You are a helpful assistant who understands the intent of the user's question.",
-        'user' : "Which category does the sentence below belong to: 'recommand', 'comparison', 'summarization'? Show only categories."
+        'user' : "Which category does the sentence below belong to: 'Recommendation', 'Comparison', 'Summarization'? Show only categories."
     } 
 }
 
 def set_prompt(intent, input, msg_prompt):
     m = dict()
-    if('recommand' in intent):
-        msg = msg_prompt['recommand']
-    elif('comparison' in intent):
-        msg = msg_prompt['comparison']
-    elif('summarization' in intent):
-        msg = msg_prompt['summarization']
+    if('Recommendation' in intent):
+        msg = msg_prompt['Recommendation']
+    elif('Comparison' in intent):
+        msg = msg_prompt['Comparison']
+    elif('Summarization' in intent):
+        msg = msg_prompt['Summarization']
     else:
         msg = msg_prompt['intent']
         msg['user'] += f' {input} \n A:'
@@ -92,12 +94,12 @@ def process_input():
     print(input)
     print(user_intent)
 
-    '''intent_data = set_prompt(user_intent, input, msg_prompt)
+    intent_data = set_prompt(user_intent, input, msg_prompt)
     intent_data_msg = chatGPT(intent_data).replace("\n", "").strip()
     
-    print(intent_data_msg)'''
+    print(intent_data_msg)
 
-    return jsonify(result)
+    return jsonify({'intent_data_msg' : intent_data_msg})
 
 @app.route('/')
 def crawling(output):

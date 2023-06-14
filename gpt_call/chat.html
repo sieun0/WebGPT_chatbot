@@ -29,7 +29,7 @@
     async function callGPTapi(messages) {
           let outputText = '';
           const configuration = new Configuration({
-              apiKey: ''
+              apiKey: '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'
           });
           const openai = new OpenAIApi(configuration);
         
@@ -132,10 +132,34 @@
  
         const output = await callGPTapi(keywordmessages);
         console.log(output);
-        var outputbox = `<div class="line">
-            <span class="chat-box">${ output }</span>
+        fetch('/process_input', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ input: inputText })
+        })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('서버 응답 오류');
+            }
+          })
+          .then(data => {
+            var outputbox = `<div class="line">
+              <span class="chat-box">${data.intent_data_msg}</span>
+            </div>`;
+            document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+          })
+          .catch(error => {
+            console.error('AJAX 요청 실패:', error);
+          });
+
+        /*var outputbox = `<div class="line">
+            <span class="chat-box">${intent_data_msg}</span>
         </div>`
-        document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+        document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);*/
         
         sendInputToServer(inputText);
         sendOutputToServer(output);
