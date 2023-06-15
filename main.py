@@ -9,7 +9,7 @@ import subprocess
 import json
 
 app = Flask(__name__)
-CORS(app)
+#CORS(app)
 
 API_KEY= os.getenv("FLASK_API_KEY")
 
@@ -28,13 +28,13 @@ msg_prompt = {
     },
     'intent' : {
         'system' : "You are a helpful assistant who understands the intent of the user's question.",
-        'user' : "Which category does the sentence below belong to: 'Recommendation', 'Comparison', 'Summarization'? Show only categories."
+        'user' : "Which category does the sentence below belong to: 'Search', Recommendation', 'Comparison', 'Summarization'? Show only categories."
     } 
 }
 
 def set_prompt(intent, input, msg_prompt):
     m = dict()
-    if('Recommendation' in intent):
+    if('Recommendation' in intent) or ('Search' in intent):
         msg = msg_prompt['Recommendation']
     elif('Comparison' in intent):
         msg = msg_prompt['Comparison']
@@ -60,7 +60,6 @@ def chatGPT(messages):
     )
     return completion['choices'][0]['message']['content']
 
-
 '''if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)'''
 
@@ -78,9 +77,23 @@ def process_output():
     crawling(output)
 
     with open('./webCrawling/output.json', 'r') as f:
-        jsondata = json.load(f)
+        product_list = json.load(f)
 
-    return jsonify(result)
+    '''product_list = []
+
+    for item in jsondata:
+        product = {
+            "name" : item["name"],
+            "price": item["price"],
+            "img_url": item["img_url"],
+            "goto_url": item["goto_url"],
+            "detail": item["detail"]
+        }
+        product_list.append(product)'''
+
+    #print(jsondata[0])
+    
+    return jsonify({'product_list' : product_list})
 
 @app.route('/process_input', methods=['POST'])
 def process_input():
@@ -91,7 +104,7 @@ def process_input():
     user_intent = set_prompt('intent', input, msg_prompt)
     user_intent = chatGPT(user_intent)
     
-    print(input)
+    #print(input)
     print(user_intent)
 
     intent_data = set_prompt(user_intent, input, msg_prompt)
