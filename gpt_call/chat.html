@@ -8,7 +8,7 @@
 </head>
 <body>
   <style>
-    .chat-content { height: 700px; overflow-y: scroll;}
+    .chat-content { height: 700px; overflow-y: scroll; overflow: auto;}
     .line { margin-top: 10px; display: flex;}
     .chat-box {background: #eee; padding: 5px; max-width: 200px;}
     .mine {margin-left: auto;}
@@ -29,7 +29,7 @@
     async function callGPTapi(messages) {
           let outputText = '';
           const configuration = new Configuration({
-              apiKey: ''
+              apiKey: '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'
           });
           const openai = new OpenAIApi(configuration);
         
@@ -130,12 +130,16 @@
               }
             })
             .then(data => {
-              //var product_list = data.product_list;
-              var outputbox = `<div class="line">`;
+              var outputbox = '';
               for (const product of data.product_list) {
-                outputbox += '<span class = "chat-box">' + product.name + '</span>';
+                outputbox += '<div class="line">';
+                outputbox += '<div class="chat-box">' + product.name;
+                //outputbox += '</div>';
+                //outputbox += '<div class="line">';
+                outputbox += '<div class="sub-chat-box">' + product.price + '</div>';
+                outputbox += '</div></div>';
               }
-              outputbox += '</div>';
+        
               document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
             })
             .catch(error => {
