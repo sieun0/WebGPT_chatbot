@@ -32,6 +32,20 @@ msg_prompt = {
     } 
 }
 
+price_messages = [
+    {"role" : "system", "content" : "You are a helpful assistant to write a python program."}
+]
+
+test = [{
+    "name": "애플 아이패드 미니6세대 셀룰러 256GB (색상선택)",
+    "price": 1225500
+  },
+  {
+    "name": "Apple 아이폰 14 128GB 미개통 미개봉 새상품",
+    "price": 1119000
+  }
+]
+
 def set_prompt(intent, input, msg_prompt):
     m = dict()
     if('Recommendation' in intent) or ('Search' in intent):
@@ -72,9 +86,11 @@ def process_output():
     data = request.get_json()
     output = data['output']
 
-    result = {'message' : ' output 작업이 완료되었습니다.'}
+    result = {'message' : 'output 작업이 완료되었습니다.'}
 
     crawling(output)
+
+    product_list = []
 
     with open('./webCrawling/output.json', 'r') as f:
         product_list = json.load(f)
@@ -92,8 +108,24 @@ def process_output():
         product_list.append(product)'''
 
     #print(jsondata[0])
+
+    for product in product_list: #html에서 product_list만 먼저 받아오기. 리스트가 먼저 출력되야 하기 때문. 
+        role = "system"
+        content = f'Product Name : {product["name"]}\nPrice: {product["price"]}'
+        price_messages.append({"role":role , "content":content})
+    price_messages.append({"role":"user", "content": "price 값을 int로 형변환 한 뒤, 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태를 저장하는 python 프로그램을 작성하고, 저장된 list 결과값을 json 형태로 출력해줘."})
     
-    return jsonify({'product_list' : product_list})
+
+    price_output = chatGPT(price_messages)
+    print(price_output)
+
+    '''price_messages2 = [{"role":"user", "content": "price 값이 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태를 저장하는 python 프로그램을 작성하고, 저장된 list 결과값만 반환해줘. list 결과값을 출력해줘."}]
+    price_messages2.append({"role":"assistant", "content":price_output})
+    price_messages2.append({"role": "user", "content":"only 저장된 리스트의 속성값만 출력해줘."})
+    price_output2 = chatGPT(price_messages2)
+    print(price_output2)'''
+    
+    return jsonify({'product_list' : product_list, 'price_output': price_output})
 
 @app.route('/process_input', methods=['POST'])
 def process_input():

@@ -29,7 +29,7 @@
     async function callGPTapi(messages) {
           let outputText = '';
           const configuration = new Configuration({
-              apiKey: ''
+              apiKey: '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'
           });
           const openai = new OpenAIApi(configuration);
         
@@ -141,6 +141,10 @@
               }
         
               document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+              /* console.log(data.price_output);
+              outputbox = `<div class="line">
+              <span class="chat-box">${data.price_output}</span>
+              </div>`;*/
             })
             .catch(error => {
               console.error('AJAX 요청 실패:', error);

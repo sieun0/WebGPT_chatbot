@@ -19,7 +19,7 @@ request(url_goto, function(error, response, html) {
     if(error) {throw error};
     
     const $ = cheerio.load(html);
-    var requests = $('#list_ > a').slice(0,20).map(function(index, element){
+    var requests = $('#list_ > a').slice(0,10).map(function(index, element){
 
         const name = $(this).find('div.listbox > div.detail > div.title').text().trim();
         const price = $(this).find('div.listbox > div.detail > div.price').text().trim();
