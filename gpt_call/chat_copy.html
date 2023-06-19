@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <style>
+    .chat-content { height: 700px; overflow-y: scroll; overflow: auto;}
+    .line { margin-top: 10px; display: flex;}
+    .chat-box {background: #eee; padding: 5px; max-width: 200px;}
+    .mine {margin-left: auto;}
+  </style>
+  <div class="chat-content">
+    <div class="line">
+      <span class="chat-box">안녕?</span>
+    </div>
+    <div class="line">
+      <span class="chat-box mine">안녕!</span>
+    </div>
+  </div>
+  <input class="chat-box" id="input">
+  <button id="send">전송</button>
+  
+  <script type ="module">
+    import { Configuration, OpenAIApi } from 'https://cdn.skypack.dev/openai';
+    async function callGPTapi(messages) {
+          let outputText = '';
+          const configuration = new Configuration({
+              apiKey: ''
+          });
+          const openai = new OpenAIApi(configuration);
+        
+          /*for(let i=0; i<response.length; i++) {
+              messages.push({'role':'assistant', 'content':response[i].completion});
+          }*/               
+          try {
+            const result = await openai.createChatCompletion({
+              model: "gpt-3.5-turbo",
+              messages: messages
+            });
+
+            outputText = result.data.choices[0].message.content;
+
+            return outputText;
+          } catch (error) {
+            console.error(error);
+          }
+          
+    }
+
+    async function question(inputs = null){
+        var inputText = document.querySelector('#input').value;
+        if(inputs) {
+          inputText = inputs
+        }
+        var inputbox = `<div class="line">
+            <span class="chat-box mine">${ inputText }</span>
+        </div>`
+        document.querySelector('.chat-content').insertAdjacentHTML('beforeend', inputbox);
+        
+        const keywordmessages = [
+                        {'role': 'user', 'content': crawilingText},
+                        {'role':'assistant', 'content':'OK'},    
+                        {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
+                        {'role':'assistant', 'content':'171,000원입니다.<span id="goto_url" style="display:none" ques="장수 오리골펜션 요약해줘.">요약</span>'},
+                        {'role': 'user', 'content': "50000원보다 비싼 것은?"},             
+                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},              
+                        {'role':'user', 'content':inputText},
+                        {'role':'assistant', 'content':'보라카이 리조트'},
+                      ];
+                                              
+        let output = await callGPTapi(keywordmessages);
+        console.log(output);
+        output = output.replace('<span id="goto_url" style="display:none"', '<span id="goto_url" style="color:blue" onclick="document.querySelector(\'#input\').value = this.getAttribute(\'ques\');document.querySelector(\'#send\').click();"');
+        //this.getAttribute(\'ques\')
+
+            var outputbox = `<div class="line">
+              <span class="chat-box">${output}</span>
+            </div>`;
+            document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+
+    } 
+
+    document.querySelector('#send').addEventListener('click', function(){ question();} )
+
+ 
+
+    let crawilingText = "";
+    function getContentUrl() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/crawl', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          crawilingText = xhr.responseText;
+        }
+      };
+      xhr.send();
+    }
+    getContentUrl();
+  </script>
+</body>
+</html>

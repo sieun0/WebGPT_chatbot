@@ -33,7 +33,7 @@ msg_prompt = {
 }
 
 price_messages = [
-    {"role" : "system", "content" : "You are a helpful assistant to write a python program."}
+    {"role" : "system", "content" : "You are a helpful assistant to print out only product_list."}
 ]
 
 test = [{
@@ -79,7 +79,13 @@ def chatGPT(messages):
 
 @app.route("/")
 def chat():
-    return send_from_directory('gpt_call', 'chat.html')
+    return send_from_directory('gpt_call', 'chat_copy.html')
+
+@app.route("/crawl")
+def crawl():
+    return send_from_directory('webCrawling', 'output.json')
+  
+
 
 @app.route('/process_output', methods=['POST'])
 def process_output():
@@ -95,17 +101,6 @@ def process_output():
     with open('./webCrawling/output.json', 'r') as f:
         product_list = json.load(f)
 
-    '''product_list = []
-
-    for item in jsondata:
-        product = {
-            "name" : item["name"],
-            "price": item["price"],
-            "img_url": item["img_url"],
-            "goto_url": item["goto_url"],
-            "detail": item["detail"]
-        }
-        product_list.append(product)'''
 
     #print(jsondata[0])
 
@@ -113,17 +108,24 @@ def process_output():
         role = "system"
         content = f'Product Name : {product["name"]}\nPrice: {product["price"]}'
         price_messages.append({"role":role , "content":content})
-    price_messages.append({"role":"user", "content": "price 값을 int로 형변환 한 뒤, 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태를 저장하는 python 프로그램을 작성하고, 저장된 list 결과값을 json 형태로 출력해줘."})
-    
+    #price_messages.append({"role":"user", "content": "일단, price 값을 int로 형변환 한 뒤, 100,000 이상인 product들을 찾아서 name과 price를 list 형태로 저장하고, 저장된 list 결과값을 product_list 배열을 만들어 거기에 json 형태로 저장해줘."})
+    price_messages.append({"role":"user", "content": "price 값을 int로 형변환 한 뒤, price가 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태로 저장하고, 저장된 list 결과값을 product_list 배열을 만들어 거기에 json 형태로 저장해줘. 그리고 product_list =[] 형식으로 나에게 보여줘."})
 
     price_output = chatGPT(price_messages)
     print(price_output)
+    print("\n\n\n\n\n\n\n\n\n\n")
 
-    '''price_messages2 = [{"role":"user", "content": "price 값이 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태를 저장하는 python 프로그램을 작성하고, 저장된 list 결과값만 반환해줘. list 결과값을 출력해줘."}]
-    price_messages2.append({"role":"assistant", "content":price_output})
-    price_messages2.append({"role": "user", "content":"only 저장된 리스트의 속성값만 출력해줘."})
-    price_output2 = chatGPT(price_messages2)
-    print(price_output2)'''
+    price_messages.append({"role":"assistant", "content": price_output})
+    price_messages.append({"role":"user", "content": "코드를 작성하지 말고, 앞에서 저장된 product_list의 'name'과 'price' 값을 모두 출력해줘." })
+
+    price_output2 = chatGPT(price_messages)
+    print(price_output2)
+
+    # price_messages2 = [{"role":"system", "content": "You are a helpful assistant to print out a product_list."}]
+    # price_messages2.append({"role":"system", "content":price_output})
+    # price_messages2.append({"role": "user", "content":"product_list 값만 뽑아서 출력해줘."})
+    # price_output2 = chatGPT(price_messages2)
+    # print(price_output2)
     
     return jsonify({'product_list' : product_list, 'price_output': price_output})
 

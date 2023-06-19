@@ -2,6 +2,7 @@ var cheerio = require('cheerio');
 var request = require('request'); //원하는 페이지에 request 요청을 보내기 위해
 var https = require("https");
 var fs = require('fs');
+const { EventEmitter } = require('stream');
 //const readline = require("readline");
 var list =[];
 const data = process.argv[2];
@@ -11,6 +12,7 @@ var encodedData = encodeURIComponent(data);
     output:process.stdout
 });
 
+
 data.on('line', function(line) {*/ 
 
 var url_goto = "http://www.hsmoa.com/search?query=" + encodedData + "&from=navigation_query";
@@ -18,6 +20,7 @@ var url_goto = "http://www.hsmoa.com/search?query=" + encodedData + "&from=navig
 request(url_goto, function(error, response, html) {
     if(error) {throw error};
     
+    EventEmitter.setMaxListeners(15);
     const $ = cheerio.load(html);
     var requests = $('#list_ > a').slice(0,10).map(function(index, element){
 
