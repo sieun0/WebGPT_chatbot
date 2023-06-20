@@ -64,9 +64,6 @@ def chatGPT(messages):
     )
     return completion['choices'][0]['message']['content']
 
-'''if __name__ == '__main__':
-    app.run(host='127.0.0.1', debug=True, port=5000)'''
-
 @app.route("/")
 def chat():
     return send_from_directory('gpt_call', 'chat_copy.html')
@@ -86,8 +83,6 @@ def process_output():
 
     with open('./webCrawling/output.json', 'r') as f:
         product_list = json.load(f)
-
-    #print(product_list)
     
     return jsonify({'product_list' : product_list})
 
@@ -99,9 +94,6 @@ def process_input():
     result = {'message' : 'input 작업이 완료되었습니다.'}
     user_intent = set_prompt('intent', input, msg_prompt)
     user_intent = chatGPT(user_intent)
-    
-    #print(input)
-    print(user_intent)
 
     intent_data = set_prompt(user_intent, input, msg_prompt)
     intent_data_msg = chatGPT(intent_data).replace("\n", "").strip()
@@ -113,9 +105,7 @@ def process_input():
 @app.route('/')
 def crawling(output):
     cmd = f'node ./webCrawling/crawling.js "{output}"'
-    #cmd = ['node', './webCrawling/crawling.js', "{output}"]
     subprocess.run(cmd, shell=True)
-    #return send_from_directory('webCrawling', 'app.js')
 
 @app.route("/crawl")
 def crawldata():

@@ -22,7 +22,6 @@ var requestOptions = {
 request(url_goto, requestOptions, function(error, response, html) {
     if(error) {throw error};
     
-    //EventEmitter.setMaxListeners(15);
     const $ = cheerio.load(html);
     var requests = $('#list_ > a').slice(0,7).map(function(index, element){
 
@@ -63,20 +62,15 @@ function requestDetailPage(name, price, img_url, url_detail) {
                 $('#ProTab04 > div.normalN_table_wrap.more > table > tbody > tr').each(function(index, element) {
                     const info = $(this).find('th').text().trim();
                     const info2 = $(this).find('td').text().trim();
-                    //rowData.push({'info': info, 'info2' : info2});
                     rowData[info] = info2;
                 });
-                //console.log(rowData);
             }
             else if($('#ui_tab2').length) { //sinsegaetv
                 $('#ui_tab2 > div.tab_cont.tab_details_info > div:nth-child(3) > div.desc_con > div > ul > li').each(function(index, element) {
                     const info = $(this).find('dl > dt').text().trim();
                     const info2 = $(this).find('dl > dd').text().trim();
-                    //rowData.push({'info':info, 'info2': info2});
                     rowData[info] = info2;
                 });
-
-                //console.log(rowData);
             }
             else if($('#contents').length) { //롯데홈쇼핑
                 $('#contents > div.detail_sec > div.division_product_tab.fixed > div.content_detail > div.wrap_detail.content2.on > div > div:nth-child(3) > table > tbody > tr').each(function(index, element) {
@@ -108,8 +102,6 @@ function requestDetailPage(name, price, img_url, url_detail) {
             }
 
             list.push({'name': name, 'price': price, 'img_url':img_url, 'goto_url': url_detail, 'detail': rowData});
-
-            //console.log(list);
 
             resolve();
         });
