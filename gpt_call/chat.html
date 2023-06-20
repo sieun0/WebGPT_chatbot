@@ -58,6 +58,32 @@
         </div>`
         document.querySelector('.chat-content').insertAdjacentHTML('beforeend', inputbox);
         
+        const contextmessages = [
+          {'role': 'system', 'content': 'You are a helpful assistant that examines the context of a sentence to determine if it is searching for a product or not.'},
+          {'role': 'user', 'content':'삼성 이온 노트북의 가격은 얼마야?'},
+          {'role': 'assistant', 'content':'yes'},
+          {'role':'user', 'content':'보라카이의 리조트를 가고 싶어'},
+          {'role': 'assistant', 'content':'yes'},
+          {'role':'user', 'content':'안녕. 날씨가 좋네.'},
+          {'role': 'assistant', 'content':'no'},
+          {'role':'user', 'content':'오늘 뭐했어?'},
+          {'role': 'assistant', 'content':'no'},
+          {'role':'user', 'content':'만화방에 가고 싶어.'},
+          {'role': 'assistant', 'content':'no'},
+          {'role':'user', 'content':'여성여름바지 사고싶어. 가격 추천해줘.'},
+          {'role': 'assistant', 'content':'yes'},
+          {'role':'user', 'content':'학교에 가야겠다.'},
+          {'role': 'assistant', 'content':'no'},
+          {'role':'user', 'content':'편한 의자는 뭐가 있을까?'},
+          {'role': 'assistant', 'content':'yes'},
+          {'role':'user', 'content':'생일 축하해!'},
+          {'role': 'assistant', 'content':'no'},
+          {'role': 'user', 'content': inputText}
+        ]
+
+        const contextOutput = await callGPTapi(contextmessages);
+        console.log("첫번째 단계(맥락 파악): " + contextOutput);
+      
         const keywordmessages = [ //검색어 입력 키워드 추출해내는 메시지
                         {'role':'system', 'content':'You are an AI that only extracts keyword words from sentences to search on the website. You are extract only words that are not in sentence form. You cannot print it out as a sentence. For example, in the sentence "1Kg 이하의 삼성 이온 노트북의 리뷰를 요약해줘", the keyword word is "삼성 이온 노트북".'},
                         {'role':'user', 'content':'2만원 이하의 장수 사과를 찾아줘.'},
