@@ -4,32 +4,81 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Chat with GPT-3.5</title>
+  <style>
+    .chat-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      font-family: Arial, sans-serif;
+    }
+
+    .chat-content {
+      margin-bottom: 20px;
+    }
+
+    .line {
+      margin-bottom: 10px;
+    }
+
+    .chat-box {
+      padding: 10px 15px;
+      border-radius: 5px;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .mine {
+      background-color: #dcf8c6;
+      float: right;
+    }
+
+    .response {
+      background-color: #fff;
+      float: left;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+
 </head>
 <body>
-  <style>
-    .chat-content { height: 700px; overflow-y: scroll; overflow: auto;}
-    .line { margin-top: 10px; display: flex;}
-    .chat-box {background: #eee; padding: 5px; max-width: 200px;}
-    .mine {margin-left: auto;}
-  </style>
-  <div class="chat-content">
-    <div class="line">
-      <span class="chat-box">안녕?</span>
-    </div>
-    <div class="line">
-      <span class="chat-box mine">안녕!</span>
+  <div class="chat-container">
+    <h2>Chat with GPT-3.5</h2>
+    <div class="chat-content"></div>
+    <div>
+      <input type="text" id="input" placeholder="Type your message...">
+      <button id="send">Send</button>
     </div>
   </div>
-  <input class="chat-box" id="input">
-  <button id="send">전송</button>
   
   <script type ="module">
     import { Configuration, OpenAIApi } from 'https://cdn.skypack.dev/openai';
     async function callGPTapi(messages) {
           let outputText = '';
           const configuration = new Configuration({
-              apiKey: ''
+              apiKey:'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'
           });
           const openai = new OpenAIApi(configuration);
         
@@ -41,7 +90,8 @@
               model: "gpt-3.5-turbo",
               messages: messages
             });
-
+      
+            console.log(result)
             outputText = result.data.choices[0].message.content;
 
             return outputText;
@@ -51,34 +101,135 @@
           
     }
 
+    function processInput(inputText) {
+      fetch('/process_input', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ input: inputText })
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('서버 응답 오류');
+          }
+        })
+        .then(data => {
+          var outputbox = `<div class="line">
+            <span class="chat-box">${data.intent_data_msg}</span>
+          </div>`;
+          document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+        })
+        .catch(error => {
+          console.error('AJAX 요청 실패:', error);
+        });
+    }
+
+
+    async function processOutput(output) {
+      await fetch('/process_output', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ output: output })
+      })
+        .then(response => {
+          console.log("processOutput thens")
+          if (response.ok) {
+            //console.log(response)
+            return response.json();
+          } else {
+            console.log("processOutput fail")
+            throw new Error('서버 응답 오류');
+          }
+        })
+        .then(data => {
+          console.log(data);
+          crawilingText = JSON.stringify(data.product_list);
+          //return data;
+          /*var outputbox = `<div class="line">
+            <span class="chat-box">${data.product_list}</span>
+          </div>`;
+          document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);*/
+          //getContentUrl();
+        })
+        .catch(error => {
+          console.error('AJAX 요청 실패:', error);
+        });
+    }
+
+
     async function question(inputs = null){
         var inputText = document.querySelector('#input').value;
         if(inputs) {
-          inputText = inputs
+          inputText = inputs;
         }
         var inputbox = `<div class="line">
             <span class="chat-box mine">${ inputText }</span>
-        </div>`
+        </div>`;
         document.querySelector('.chat-content').insertAdjacentHTML('beforeend', inputbox);
-        
-        const keywordmessages = [
+        processInput(inputText); //사용자 입력 값 서버로 보냄.
+
+        const keywordmessages = [ //검색어 입력 키워드 추출해내는 메시지
+                        {'role':'system', 'content':'You are an AI that only extracts keyword words from sentences to search on the website. You are extract only words that are not in sentence form. You cannot print it out as a sentence. For example, in the sentence "1Kg 이하의 삼성 이온 노트북의 리뷰를 요약해줘", the keyword word is "삼성 이온 노트북".'},
+                        {'role':'user', 'content':'2만원 이하의 장수 사과를 찾아줘.'},
+                        {'role':'assistant', 'content':'장수 사과'},
+                        {'role':'user', 'content':'보라카이의 리조트를 가고 싶어'},
+                        {'role':'assistant', 'content':'보라카이 리조트'},
+                        {'role':'user', 'content':'여성여름바지사고싶어. 가격추천해줘.'},
+                        {'role':'assistant', 'content':'여성여름바지'},
+                        {'role':'user', 'content':'다이슨 청소기를 사고싶어. 가격을 알려줄래?'},
+                        {'role':'assistant', 'content':'다이슨 청소기'},
+                        {'role':'user', 'content':'여성여름 바지 가격 비교'},
+                        {'role':'assistant', 'content':'여성여름 바지'},
+                        {'role':'user', 'content':'제일 당류가 적은 커피는 ???'},
+                        {'role':'assistant', 'content':'커피'},
+                        {'role':'user', 'content':'나이키 브랜드의 슬리퍼를 구매하고 싶어. 제일 저렴한 게 뭐야?'},
+                        {'role':'assistant', 'content':'나이키 슬리퍼'},
+                        {'role':'user', 'content':'유통기한이 2023년 이내인 몰티져스 초콜릿을 찾아줘.'},
+                        {'role':'assistant', 'content':'몰티져스 초콜릿'},
+                        {'role':'user', 'content':'캐리비안 베이 티켓은 얼마야? 그것도 여기 파나?'},
+                        {'role':'assistant', 'content':'캐리비안 베이 티켓'},
+                        {'role':'user', 'content':'LG 그램의 리뷰 요약해줘.'},
+                        {'role':'assistant', 'content':'lg 그램'},
+                        {'role':'user', 'content':'애플 맥북의 리뷰를 요약해줘.'},
+                        {'role':'assistant', 'content':'애플 맥북'},
+                        {'role':'user', 'content':'삼성 노트북 가격 출력해줘'},
+                        {'role':'assistant', 'content':'삼성 노트북'},
+                        {'role': 'user', 'content': inputText}
+                        //{'role':'assistant', 'content': {'prompt':'5L 이상인 에어 프라이어를 보여줘.', 'completion':'에어 프라이어'}}
+                        ]
+
+        let outputkeyword = await callGPTapi(keywordmessages);
+        console.log(outputkeyword);
+
+        //let crawilingText = "";
+        await processOutput(outputkeyword); //키워드값 서버로 전송 후 서버에서 crawling 처리!
+        console.log(crawilingText);
+        const intentmessages = [
                         {'role': 'user', 'content': crawilingText},
                         {'role':'assistant', 'content':'OK'},    
-                        {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
+/*                        {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
                         {'role':'assistant', 'content':'171,000원입니다.<span id="goto_url" style="display:none" ques="장수 오리골펜션 요약해줘.">요약</span>'},
                         {'role': 'user', 'content': "50000원보다 비싼 것은?"},             
-                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},              
-                        {'role':'user', 'content':inputText},
-                        {'role':'assistant', 'content':'보라카이 리조트'},
+                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},              */
+                        {'role':'user', 'content':inputText}
+                        //{'role':'assistant', 'content':'보라카이 리조트'},
                       ];
-                                              
-        let output = await callGPTapi(keywordmessages);
-        console.log(output);
-        output = output.replace('<span id="goto_url" style="display:none"', '<span id="goto_url" style="color:blue" onclick="document.querySelector(\'#input\').value = this.getAttribute(\'ques\');document.querySelector(\'#send\').click();"');
+         //  100만원대 에어컨 알려줘                                   
+        let outputIntent = await callGPTapi(intentmessages);
+        // console.log(outputIntent);
+        
+        //console.log(crawlingText);
+
+        //output = output.replace('<span id="goto_url" style="display:none"', '<span id="goto_url" style="color:blue" onclick="document.querySelector(\'#input\').value = this.getAttribute(\'ques\');document.querySelector(\'#send\').click();"');
         //this.getAttribute(\'ques\')
 
             var outputbox = `<div class="line">
-              <span class="chat-box">${output}</span>
+              <span class="chat-box">${outputIntent}</span>
             </div>`;
             document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
 
@@ -86,10 +237,9 @@
 
     document.querySelector('#send').addEventListener('click', function(){ question();} )
 
- 
 
     let crawilingText = "";
-    function getContentUrl() {
+/*    function getContentUrl() {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', '/crawl', true);
       xhr.onreadystatechange = function() {
@@ -99,7 +249,7 @@
       };
       xhr.send();
     }
-    getContentUrl();
+    getContentUrl();*/
   </script>
 </body>
 </html>

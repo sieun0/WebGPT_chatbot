@@ -2,25 +2,27 @@ var cheerio = require('cheerio');
 var request = require('request'); //원하는 페이지에 request 요청을 보내기 위해
 var https = require("https");
 var fs = require('fs');
-const { EventEmitter } = require('stream');
+//const EventEmitter = require('events');
+require('events').EventEmitter.defaultMaxListeners = 20;
 //const readline = require("readline");
 var list =[];
 const data = process.argv[2];
 var encodedData = encodeURIComponent(data);
-/*const data = readline.createInterface({
-    input: process.stdin,
-    output:process.stdout
-});
 
-
-data.on('line', function(line) {*/ 
-
+//const emitter = new EventEmitter();
+//emitter.setMaxListeners(20);
+//console.log("process.argv 값 : " + data);
 var url_goto = "http://www.hsmoa.com/search?query=" + encodedData + "&from=navigation_query";
 
-request(url_goto, function(error, response, html) {
+var requestOptions = {
+    maxRedirects: 15,
+    timeout: 5000
+};
+
+request(url_goto, requestOptions, function(error, response, html) {
     if(error) {throw error};
     
-    EventEmitter.setMaxListeners(15);
+    //EventEmitter.setMaxListeners(15);
     const $ = cheerio.load(html);
     var requests = $('#list_ > a').slice(0,10).map(function(index, element){
 

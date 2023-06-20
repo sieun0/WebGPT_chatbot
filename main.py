@@ -36,16 +36,6 @@ price_messages = [
     {"role" : "system", "content" : "You are a helpful assistant to print out only product_list."}
 ]
 
-test = [{
-    "name": "애플 아이패드 미니6세대 셀룰러 256GB (색상선택)",
-    "price": 1225500
-  },
-  {
-    "name": "Apple 아이폰 14 128GB 미개통 미개봉 새상품",
-    "price": 1119000
-  }
-]
-
 def set_prompt(intent, input, msg_prompt):
     m = dict()
     if('Recommendation' in intent) or ('Search' in intent):
@@ -80,10 +70,6 @@ def chatGPT(messages):
 @app.route("/")
 def chat():
     return send_from_directory('gpt_call', 'chat_copy.html')
-
-@app.route("/crawl")
-def crawl():
-    return send_from_directory('webCrawling', 'output.json')
   
 
 
@@ -101,33 +87,9 @@ def process_output():
     with open('./webCrawling/output.json', 'r') as f:
         product_list = json.load(f)
 
-
-    #print(jsondata[0])
-
-    for product in product_list: #html에서 product_list만 먼저 받아오기. 리스트가 먼저 출력되야 하기 때문. 
-        role = "system"
-        content = f'Product Name : {product["name"]}\nPrice: {product["price"]}'
-        price_messages.append({"role":role , "content":content})
-    #price_messages.append({"role":"user", "content": "일단, price 값을 int로 형변환 한 뒤, 100,000 이상인 product들을 찾아서 name과 price를 list 형태로 저장하고, 저장된 list 결과값을 product_list 배열을 만들어 거기에 json 형태로 저장해줘."})
-    price_messages.append({"role":"user", "content": "price 값을 int로 형변환 한 뒤, price가 1,000,000 이상인 product들을 찾아서 name과 price를 list 형태로 저장하고, 저장된 list 결과값을 product_list 배열을 만들어 거기에 json 형태로 저장해줘. 그리고 product_list =[] 형식으로 나에게 보여줘."})
-
-    price_output = chatGPT(price_messages)
-    print(price_output)
-    print("\n\n\n\n\n\n\n\n\n\n")
-
-    price_messages.append({"role":"assistant", "content": price_output})
-    price_messages.append({"role":"user", "content": "코드를 작성하지 말고, 앞에서 저장된 product_list의 'name'과 'price' 값을 모두 출력해줘." })
-
-    price_output2 = chatGPT(price_messages)
-    print(price_output2)
-
-    # price_messages2 = [{"role":"system", "content": "You are a helpful assistant to print out a product_list."}]
-    # price_messages2.append({"role":"system", "content":price_output})
-    # price_messages2.append({"role": "user", "content":"product_list 값만 뽑아서 출력해줘."})
-    # price_output2 = chatGPT(price_messages2)
-    # print(price_output2)
+    #print(product_list)
     
-    return jsonify({'product_list' : product_list, 'price_output': price_output})
+    return jsonify({'product_list' : product_list})
 
 @app.route('/process_input', methods=['POST'])
 def process_input():
@@ -150,9 +112,14 @@ def process_input():
 
 @app.route('/')
 def crawling(output):
-    cmd = f'node ./webCrawling/crawling.js {output}'
+    cmd = f'node ./webCrawling/crawling.js "{output}"'
+    #cmd = ['node', './webCrawling/crawling.js', "{output}"]
     subprocess.run(cmd, shell=True)
     #return send_from_directory('webCrawling', 'app.js')
+
+@app.route("/crawl")
+def crawldata():
+    return send_from_directory('webCrawling', 'output.json')
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port=5000)
