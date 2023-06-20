@@ -101,8 +101,8 @@
           
     }
 
-    function processInput(inputText) {
-      fetch('/process_input', {
+    async function processInput(inputText) {
+      await fetch('/process_input', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -117,10 +117,15 @@
           }
         })
         .then(data => {
+          if(data.intent_data_msg) {
           var outputbox = `<div class="line">
             <span class="chat-box">${data.intent_data_msg}</span>
+            <span id = "user_intent" style="display:none">${data.user_intent}</span>
           </div>`;
+          console.log("출력확인 !! -> " + data.user_intent)
+          let intentText = data.user_intent;
           document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+          }
         })
         .catch(error => {
           console.error('AJAX 요청 실패:', error);
@@ -147,8 +152,47 @@
         })
         .then(data => {
           //console.log(data);
-          crawilingText = JSON.stringify(data.product_list);
-          //return data;
+          let allText = "";
+          for(let j=0; j < data.product_list.length; j++) {
+            //data.product_list[j].store = "홈쇼핑모아";
+            if(data.product_list[j].name) {
+              allText += "상품명 : " + data.product_list[j].name + "\n";
+            }
+            if(data.product_list[j].price) {
+              allText += "가격 : " + data.product_list[j].price + "\n";                     
+            }
+            if(data.product_list[j].img_url) {
+              allText += "이미지 주소 : " + data.product_list[j].img_url + "\n";                     
+            }
+            if(data.product_list[j].goto_url) {
+              allText += "바로가기 링크 주소 : " + data.product_list[j].goto_url + "\n";                     
+            }
+            allText += "\n\n"
+            
+          }
+          
+          //crawlingText = JSON.stringify(data.product_list);
+          crawlingText = allText;
+
+/*          var outputbox = '';
+          for(const product of data.product_list) {
+            outputbox += '<div class="line">';
+            outputbox += '<div class="chat-box">' + product.name;
+            outputbox += '<div class="sub-chat-box">' + product.price;
+            outputbox += '<span class="goto-url" style="color: blue; cursor: pointer;" ques="' + product.goto_url + '">상세 보기 click</span>';
+            outputbox += '</div></div></div>';
+          }
+        
+          document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
+
+          const gotoURLButtons = document.querySelectorAll('.goto-url');
+          gotoURLButtons.forEach(button => {
+          button.addEventListener('click', () => {
+          const url = button.getAttribute('ques');
+          window.location.href = url;
+  });
+});*/
+            
         })
         .catch(error => {
           console.error('AJAX 요청 실패:', error);
@@ -220,18 +264,25 @@
                         {'role':'assistant', 'content':'애플 맥북'},
                         {'role':'user', 'content':'삼성 노트북 가격 출력해줘'},
                         {'role':'assistant', 'content':'삼성 노트북'},
+                        {'role':'user', 'content':'100만원 이하의 lg 그램을 찾아줘.'},
+                        {'role':'assistant', 'content':'lg 그램'},
+                        {'role':'user', 'content':'100만원 이상이면서 200만원 이하인 lg 에어컨을 찾아줘.'},
+                        {'role':'assistant', 'content':'lg 에어컨'},
                         {'role': 'user', 'content': inputText}
                         ]
 
-/*      const intentmessages = [
-                        {'role': 'user', 'content': crawilingText},
+     /*const intentmessages = [ ===============> if(요약)일 때 참고하기 !!!!!
+                        {'role': 'system', 'content': crawilingText},
                         {'role':'assistant', 'content':'OK'},    
                         {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
                         {'role':'assistant', 'content':'171,000원입니다.<span id="goto_url" style="display:none" ques="장수 오리골펜션 요약해줘.">요약</span>'},
                         {'role': 'user', 'content': "50000원보다 비싼 것은?"},             
-                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},             
+                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},
+                        {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
+                        {'role':'assistant', 'content':'171,000원입니다.<span id="goto_url" style="display:none" ques="장수 오리골펜션 요약해줘.">요약</span>'},             
                         {'role':'user', 'content':inputText}
                       ];*/
+
 
         const contextOutput = await callGPTapi(contextmessages);
         console.log("첫번째 단계(맥락 파악): " + contextOutput);
@@ -242,25 +293,43 @@
             </div>`;
           document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
         } else {
-          processInput(inputText); //사용자 입력 값 서버로 보냄.
+          await processInput(inputText); //사용자 입력 값 서버로 보냄.
           let outputkeyword = await callGPTapi(keywordmessages);
           console.log("두번째 단계(키워드 추출): " + outputkeyword);
           
           await processOutput(outputkeyword); //키워드값 서버로 전송 후 서버에서 crawling 처리!
-          console.log("세번째 단계(서버 전송 후 얻은 Json 데이터" + crawilingText);
+          console.log("세번째 단계(서버 전송 후 얻은 Json 데이터" + crawlingText);
+          
+          //console.log(productList);  
+          //document.querySelector('.chat-content').insertAdjacentHTML('beforeend', outputbox);
 
-          const intentmessages = [
-                        {'role': 'user', 'content': crawilingText},
-                        {'role':'assistant', 'content':'OK'},    
-                        {'role': 'user', 'content': "장수 오리골펜션 얼마야?"},             
-                        {'role':'assistant', 'content':'171,000원입니다.<span id="goto_url" style="display:none" ques="장수 오리골펜션 요약해줘.">요약</span>'},
-                        {'role': 'user', 'content': "50000원보다 비싼 것은?"},             
-                        {'role':'assistant', 'content':'- [전북] 장수 오리골펜션(전북, 장수): 171,000원 <span id="goto_url" style="display:none" ques="[전북] 장수 오리골펜션(전북, 장수) 요약해줘">요약</span> - 9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염: 55,000원 <span id="goto_url" style="display:none" ques="9번 구운 9회 장수죽염 고체형(250g)-알갱이, 용융소금, 구죽염">요약</span> - [전북] 장수 나봄리조트(전북, 장수): 58,800원 <span id="goto_url" style="display:none" ques="[전북] 장수 나봄리조트(전북, 장수) 요약해줘">요약</span> 위 세 제품이 50,000원보다 비싼 것들입니다.'},             
-                        {'role':'user', 'content':inputText}
+          const intentmessages = [ // 검색 or 추천일때 상세정보 띄워주는.
+                        {'role': 'user', 'content': "가장 싼 아이패드는?"},
+                        {'role':'assistant', 'content':'애플 아이패드 9세대 WI-FI 64GB (색상선택) : 499,000원 \n 이 제품이 가장 저렴합니다.<span id="goto_url" style="display:none" ques="http://www.hsmoa.com/redirect?type=searchclick&from=search&site=lotteimall&pid=1889195726&query=%EC%95%84%EC%9D%B4%ED%8C%A8%EB%93%9C&rank=2&hsuri=http%3A//www.lotteimall.com/coop/affilGate.lotte%3Fchl_no%3D152379%26chl_dtl_no%3D2551480%26returnUrl%3D/goods/viewGoodsDetail.lotte%3Fgoods_no%3D1889195726%26hsmoa_userid%3D">바로가기 click!</span>'},
+                        {'role': 'user', 'content': "100만원 이하의 lg 에어컨을 찾아줘."},
+                        {'role':'assistant', 'content':'LG 휘센 오브제 에어컨 칸 FQ18VDKHA1 18형 : 1,722,000원 \n 이 제품이 100만원 이하의 LG 에어컨으로 적합합니다. <span id="goto_url" style="display:none" ques="http://www.hsmoa.com/redirect?type=searchclick&from=search&site=lotteimall&pid=1889195726&query=%EC%95%84%EC%9D%B4%ED%8C%A8%EB%93%9C&rank=2&hsuri=http%3A//www.lotteimall.com/coop/affilGate.lotte%3Fchl_no%3D152379%26chl_dtl_no%3D2551480%26returnUrl%3D/goods/viewGoodsDetail.lotte%3Fgoods_no%3D1889195726%26hsmoa_userid%3D">바로가기 click!</span>'},    
+                        {'role':'user', 'content': crawlingText + "\n 위 내용에 대해서 답변해줘. \n" + inputText}
                       ];
-
+          
+          console.log(intentmessages);
           let outputIntent = await callGPTapi(intentmessages);
           console.log("네번째 단계(의도 파악 후 의도에 맞는 지피티 호출): " + outputIntent);
+
+          outputIntent = outputIntent.replace('<span id="goto_url" style="display:none"', '<span id="goto_url" style="color:blue" onclick="document.querySelector(\'#input\').value = this.getAttribute(\'ques\');');
+          console.log("4-2 단계(정제된 Output) : " + outputIntent);
+          var outputbox = `<div class="line">
+              <span class="chat-box">${outputIntent}</span>
+            </div>`;
+            document.querySelector('.chat-content').insertAdjacentHTML('beforeend', nl2br(outputbox));
+
+          const gotoURLButtons = document.querySelectorAll('.goto-url');
+          gotoURLButtons.forEach(button => {
+            button.addEventListener('click', () => {
+              const url = button.getAttribute('ques');
+              window.location.href = url;
+            });
+          })
+
         }
 
         //let crawilingText = "";
@@ -281,18 +350,10 @@
 
     document.querySelector('#send').addEventListener('click', function(){ question();} )
 
-    let crawilingText = "";
-/*    function getContentUrl() {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', '/crawl', true);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          crawilingText = xhr.responseText;
-        }
-      };
-      xhr.send();
+    let crawlingText = "";
+    function nl2br(str) {
+      return str.replace(/(?:\r\n|\r|\n)/g, '<br>');
     }
-    getContentUrl();*/
   </script>
 </body>
 </html>

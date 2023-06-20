@@ -24,7 +24,7 @@ request(url_goto, requestOptions, function(error, response, html) {
     
     //EventEmitter.setMaxListeners(15);
     const $ = cheerio.load(html);
-    var requests = $('#list_ > a').slice(0,8).map(function(index, element){
+    var requests = $('#list_ > a').slice(0,7).map(function(index, element){
 
         const name = $(this).find('div.listbox > div.detail > div.title').text().trim();
         const price = $(this).find('div.listbox > div.detail > div.price').text().trim();

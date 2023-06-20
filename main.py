@@ -16,7 +16,7 @@ API_KEY= os.getenv("FLASK_API_KEY")
 msg_prompt = {
     'Recommendation' : {
         'system' : "You are a helpful assistant to recommend the products searched in the chatbot conversation system.",
-        'user' : "Write 1 sentence of a simple greeting that starts with '물론이죠! 제가 상품을 추천해드릴게요.'"
+        'user' : "Write 1 sentence of a simple greeting that starts with '말씀하신 상품을 찾아드리겠습니다.'"
     },
     'Comparison' : {
         'system' : "You are an assistant who can compare prices in the chatbot conversation system.",
@@ -108,7 +108,7 @@ def process_input():
     
     print(intent_data_msg)
 
-    return jsonify({'intent_data_msg' : intent_data_msg})
+    return jsonify({'user_intent': user_intent, 'intent_data_msg' : intent_data_msg})
 
 @app.route('/')
 def crawling(output):
