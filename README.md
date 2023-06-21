@@ -5,7 +5,8 @@
 
 ## System Architecture
 
-![image](https://github.com/sieun0/WebGPT_chatbot/assets/85726398/eefe8df5-6df6-457e-bcad-ec45e4415596)
+![moachatbot (1)](https://github.com/sieun0/WebGPT_chatbot/assets/85726398/cc365f2b-e94c-4ac4-9427-ab48858ad1fa)
+
 
 
 ## 주요 기능
