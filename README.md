@@ -28,3 +28,9 @@
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스에 따라 배포됩니다. 자세한 내용은 'LICENSE'파일을 참조하세요.
+
+
+## 시연 영상 캡쳐
+
+![image](https://github.com/sieun0/WebGPT_chatbot/assets/85726398/e3a4edb9-c5b5-4c2a-a3c8-ebbb654c5149)
+
